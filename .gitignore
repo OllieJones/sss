@@ -1,0 +1,8 @@
+node*
+vendor*
+.vscode
+.DS_Store
+/.idea/
+/.run/
+*~
+**/hidden-test-treeshake/

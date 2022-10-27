@@ -1,0 +1,32 @@
+# Copyright (C) 2022 Oliver Jones
+# This file is distributed under the same license as the Super Sonic Search plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Super Sonic Search 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sss\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-10-27T13:01:33-04:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.6.0\n"
+"X-Domain: sss\n"
+
+#. Plugin Name of the plugin
+msgid "Super Sonic Search"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://github.com/OllieJones/sss"
+msgstr ""
+
+#. Description of the plugin
+msgid "Delight your audience! Use Sonic Search in your WordPress website."
+msgstr ""
+
+#. Author of the plugin
+msgid "Oliver Jones"
+msgstr ""
