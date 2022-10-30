@@ -4,7 +4,7 @@ This uses [Valerian Saliou](https://github.com/valeriansaliou)'s fabulous high p
 
 Your audience gets flexible typo-tolerant search and autocompletion.
 
-## Setting up Sonic
+## Setting up Sonic for development
 
 Sonic is an executable program in the Rust language.  It needs to be running for this plugin to work.
 
@@ -17,4 +17,10 @@ git clone git@github.com:valeriansaliou/sonic.git
 cd sonic/
 cargo build --release
 cd target/release
+```
+
+Run it with 
+
+```bash
+sonic --config ./sonic/config.cfg
 ```

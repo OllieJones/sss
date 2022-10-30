@@ -8,9 +8,13 @@
  * @package WordPress Plugin Template/Uninstall
  */
 
+namespace OllieJones;
+
 // If plugin is not being uninstalled, exit (do nothing).
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	exit;
+  exit;
 }
 
 // Do something here if plugin is being uninstalled.
+delete_option( 'super_sonic_search_iso693_3_cache' );
+delete_option( 'super_sonic_search_version' );

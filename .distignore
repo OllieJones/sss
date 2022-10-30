@@ -1,4 +1,5 @@
 # Directories and files to omit from the wordpress.org svn repo.
+/sonic
 .distignore
 .gitignore
 .wordpress-org

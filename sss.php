@@ -20,18 +20,15 @@
  * @since 1.0.0
  */
 
+namespace OllieJones;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Load plugin class files.
-require_once 'includes/class-super-sonic-search.php';
-require_once 'includes/class-super-sonic-search-settings.php';
-
-// Load plugin libraries.
-require_once 'includes/lib/class-super-sonic-search-admin-api.php';
-require_once 'includes/lib/class-super-sonic-search-post-type.php';
-require_once 'includes/lib/class-super-sonic-search-taxonomy.php';
+require_once plugin_dir_path( __FILE__ ) . '/lib/autoload.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-super-sonic-search.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-super-sonic-search-settings.php';
 
 /**
  * Returns the main instance of Super_Sonic_Search to prevent the need to use globals.
