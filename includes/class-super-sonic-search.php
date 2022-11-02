@@ -7,8 +7,9 @@
 
 namespace OllieJones;
 
+require_once plugin_dir_path( __FILE__ ) . 'class-super-sonic-search-query-hooks.php';
 require_once plugin_dir_path( __FILE__ ) . 'lib/class-super-sonic-search-admin-api.php';
-require_once plugin_dir_path( __FILE__ ) . 'lib/class-super-sonic-search-hooks.php';
+require_once plugin_dir_path( __FILE__ ) . 'lib/class-super-sonic-search-admin-hooks.php';
 require_once plugin_dir_path( __FILE__ ) . 'lib/class-ingest.php';
 
 use Super_Sonic_Search_Admin_API;
@@ -111,7 +112,8 @@ class Super_Sonic_Search {
    */
   public $script_suffix;
 
-  public $hooks;
+  public $admin_hooks;
+  public $query_hooks;
 
   /**
    * Constructor funtion.
@@ -144,9 +146,10 @@ class Super_Sonic_Search {
 
     // Load API for various admin functions.
     if ( is_admin() ) {
-      $this->admin = new Super_Sonic_Search_Admin_API();
-      $this->hooks = new Super_Sonic_Search_Hooks();
+      $this->admin       = new Super_Sonic_Search_Admin_API();
+      $this->admin_hooks = new Super_Sonic_Search_Hooks();
     }
+    $this->query_hooks = new Super_Sonic_Search_Query_Hooks();
 
     // Handle localization.
     $this->load_plugin_textdomain();
@@ -283,11 +286,11 @@ class Super_Sonic_Search {
     //TODO this is a terrible place for the initial indexing operation.
     require_once( 'lib/class-ingest.php' );
     $ingester = new Ingester();
-    $query=  [
+    $query    = [
       'post_type'     => 'any',
       'nopaging'      => true,
       'post_status'   => 'publish',
-      'orderby'      => 'ID',
+      'orderby'       => 'ID',
       'cache_results' => false, /* don't invalidate the whole cache */
     ];
     $ingester->posts_ingest( $query );

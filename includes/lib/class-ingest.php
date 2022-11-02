@@ -43,12 +43,11 @@ class Ingester {
       $this->ingest  = new Ingest( new Client( 'localhost', 1491, 30 ) );
       $this->locale  = $this->getThreeLetterLanguageCode();
       try {
-        $this->ingest->connect( 'SecretPassword1' );
-        $this->control->connect( 'SecretPassword1' );
+        $result = $this->ingest->connect( 'SecretPassword1' )->getStatus();
+        $result = $this->control->connect( 'SecretPassword1' )->getStatus();
       } catch ( ConnectionException $e ) {
         error_log( "Sonic croaked" );
       }
-      //TODO new Psonic\Search(new Psonic\Client('localhost', 1491, 30));
     }
   }
 
@@ -72,7 +71,7 @@ class Ingester {
    * @return void
    */
   public function posts_ingest( $query_args ) {
-    $query = new WP_Query( $query_args);
+    $query = new WP_Query( $query_args );
     while ( $query->have_posts() ) {
       $query->the_post();
       $this->post_ingest( $query->post );
@@ -124,7 +123,7 @@ class Ingester {
     if ( ! array_key_exists( $object, $objects ) || $objects [ $object ] !== $hash ) {
       if ( strlen( $cleaned ) > 0 ) {
         $objects[ $object ] = $hash;
-        $this->ingest->push( $this->collection, self::BUCKET, $object, $content, $this->locale );
+        $this->ingest->push( $this->collection, self::BUCKET, $object, $cleaned, $this->locale );
         $this->ingested = true;
         $objectsDirty   = true;
       }
@@ -160,8 +159,8 @@ class Ingester {
    */
   private function cleanContent( $text ) {
     $a = wp_strip_all_tags( $text, true );
-    $b = preg_replace( '/[[:punct:]]/mSu', ' ', $a );
-    return preg_replace( '/\s\s+/mSu', ' ', $b );
+    //TODO can we leave punctuation?  $a = preg_replace('/[[:punct:]]/mSu', ' ', $a);
+    return preg_replace( '/\s\s+/mSu', ' ', $a );
   }
 
   /** Sonic needs a three-letter ISO 639-3 language code. This gets it from the current locale.
