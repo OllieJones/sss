@@ -57,10 +57,14 @@ class Searcher {
   }
 
   /** Do an expansive search on the provided search term.
+   *
    * @param string $searchterm One or more words for which to search.
-   * @return void
+   * @param WP_Query $query The query object
+   *
+   * @return WP_Post[]|int[]|null $posts Return an array of post data to short-circuit WP's query,
+   *                                    or null to allow WP to run its normal queries.
    */
-  public function search( $searchterm ) {
+  public function search( $searchterm, &$query ) {
     $this->connect();
     $wordsInSearchTerm = array_filter( explode( ' ', $searchterm ) );
 
@@ -131,9 +135,45 @@ class Searcher {
       }
     }
     arsort( $resultset, SORT_NUMERIC );
-    $k = $resultset;
+    $found_posts    = count( $resultset );
+    $posts_per_page = $query->query_vars['posts_per_page'];
 
-    return null;  //TODO not done yet, this is a stub.
+    $query->found_posts   = $found_posts;
+    $query->max_num_pages = intval( ceil( $found_posts / $posts_per_page ) );
+    $posts                = array_map( 'get_post', array_keys( $resultset ) );
+
+    /* we want to sort these posts by descending priority, then descending by post modified date */
+    $prioBucketSize = ( $expansionWordCount * 0.5 ) || 1;
+    $sortablePosts  = [];
+    foreach ( $posts as $post ) {
+      $sortablePosts [] =
+        (object) [
+          'prio' => intval( $resultset[ $post->ID ] / $prioBucketSize ),
+          'post' => $post,
+        ];
+    }
+    usort( $sortablePosts, function ( $a, $b ) {
+      $pa = $a->prio;
+      $pb = $b->prio;
+      if ( $pa !== $pb ) {
+        /* descending search result priority order */
+        return $pa > $pb ? - 1 : 1;
+      }
+      $da = $a->post->post_modified_date ?: $a->post->post_date;
+      $db = $b->post->post_modified_date ?: $b->post->post_date;
+
+      /* descending */
+
+      return strcmp( $db, $da );
+    } );
+    $posts = array_map( function ( $p ) {
+      return $p->post;
+    }, $sortablePosts );
+
+    $page   = array_key_exists( 'paged', $query->query_vars ) ? $query->query_vars['paged'] : 0;
+    $offset = $page === 0 ? 0 : ( $page - 1 ) * $posts_per_page;
+
+    return array_slice( $posts, $offset, $posts_per_page );
   }
 
   /** Retrieve an opaque id for a collection, based on site and subsite.
@@ -143,6 +183,7 @@ class Searcher {
   private function getCollectionName() {
     global $wpdb;
     $tag = get_option( 'siteurl' ) . $wpdb->prefix;
+
     return substr( md5( $tag ), 0, 12 );
   }
 
@@ -160,10 +201,12 @@ class Searcher {
     }
     require_once 'class-iso-language.php';
     $this->locale = ISO_Language::getLanguage( get_bloginfo( "language" ) );
+
     return $this->locale;
   }
 
   /** Add a term, setting its priority.
+   *
    * @param string $newterm
    * @param int $newPriority
    *
@@ -175,5 +218,4 @@ class Searcher {
       $this->allterms[ $newterm ] = max( $newPriority, $existingPriority );
     }
   }
-
 }

@@ -36,10 +36,12 @@ class Super_Sonic_Search_Query_Hooks extends Word_Press_Hooks {
    *
    */
   public function filter__posts_pre_query( $posts, $query ) {
-    if ( $query->is_search() ) {
+    if ( $query->is_search() && ! isset( $posts ) ) {
       $searchterm = $query->query_vars['s'];
-      return $this->searcher->search( $searchterm );
+
+      return $this->searcher->search( $searchterm, $query );
     }
+
     return $posts;
   }
 
@@ -51,6 +53,7 @@ class Super_Sonic_Search_Query_Hooks extends Word_Press_Hooks {
    * like is_main_query() test against the global $wp_query instance, not the passed one.
    *
    * @param WP_Query $query The WP_Query instance (passed by reference).
+   *
    * @since 2.0.0
    *
    */
@@ -62,6 +65,7 @@ class Super_Sonic_Search_Query_Hooks extends Word_Press_Hooks {
    * Fires after the main query vars have been parsed.
    *
    * @param WP_Query $query The WP_Query instance (passed by reference).
+   *
    * @since 1.5.0
    *
    */
@@ -74,6 +78,7 @@ class Super_Sonic_Search_Query_Hooks extends Word_Press_Hooks {
    *
    * @param string $search Search SQL for WHERE clause.
    * @param WP_Query $query The current WP_Query object.
+   *
    * @since 3.0.0
    *
    */
@@ -86,6 +91,7 @@ class Super_Sonic_Search_Query_Hooks extends Word_Press_Hooks {
    *
    * @param WP_Post $post The Post object (passed by reference).
    * @param WP_Query $query The current Query object (passed by reference).
+   *
    * @since 2.8.0
    * @since 4.1.0 Introduced `$query` parameter.
    *
