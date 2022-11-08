@@ -4,7 +4,6 @@ namespace OllieJones;
 
 use Psonic\Client;
 use Psonic\Exceptions\ConnectionException;
-use Psonic\Ingest;
 use Psonic\Control;
 use Psonic\Search;
 use WP_Post;
@@ -64,13 +63,21 @@ class Searcher {
    * @return WP_Post[]|int[]|null $posts Return an array of post data to short-circuit WP's query,
    *                                    or null to allow WP to run its normal queries.
    */
-  public function search( $searchterm, &$query ) {
+  public function search( $searchterm, $query ) {
     $this->connect();
     $wordsInSearchTerm = array_filter( explode( ' ', $searchterm ) );
 
+    $wordList = [];
+    foreach ( $wordsInSearchTerm as $word ) {
+      $wordList [] = $word;
+      $normalized = remove_accents( $word );
+      if ($word !== $normalized) {
+        $wordList [] = $normalized;
+      }
+    }
     /* put the words themselves into the list */
     $this->allterms = [];
-    foreach ( $wordsInSearchTerm as $word ) {
+    foreach ( $wordList as $word ) {
       $this->addTerm( $word, 1 );
     }
 
@@ -81,12 +88,14 @@ class Searcher {
         $this->collection,
         self::BUCKET,
         $term, /* this must only be one word, or it throws an exception */
-        20,
-        0,
-        $this->locale );
-      $expansionWordCount += count( $results );
-      foreach ( $results as $result ) {
+        20 );
+      foreach ( array_filter( $results)  as $result ) {
+        $expansionWordCount ++;
         $this->addTerm( $result, 0 );
+        $normalized = remove_accents( $result );
+        if ($result !== $normalized) {
+          $this->addTerm( $normalized, 0 );
+        }
       }
     }
 

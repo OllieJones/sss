@@ -169,11 +169,13 @@ class Super_Sonic_Search_Settings {
    * Add settings link to plugin list table
    *
    * @param array $links Existing links.
+   *
    * @return array        Modified links.
    */
   public function add_settings_link( $links ) {
     $settings_link = '<a href="options-general.php?page=' . $this->parent->_token . '_settings">' . __( 'Settings', 'super-sonic-search' ) . '</a>';
-    array_push( $links, $settings_link );
+    $links[]       = $settings_link;
+
     return $links;
   }
 
@@ -309,9 +311,7 @@ class Super_Sonic_Search_Settings {
       ],
     ];
 
-    $settings = apply_filters( $this->parent->_token . '_settings_fields', $settings );
-
-    return $settings;
+    return apply_filters( $this->parent->_token . '_settings_fields', $settings );
   }
 
   /**
@@ -383,6 +383,7 @@ class Super_Sonic_Search_Settings {
    * Settings section.
    *
    * @param array $section Array of section ids.
+   *
    * @return void
    */
   public function settings_section( $section ) {
@@ -466,6 +467,7 @@ class Super_Sonic_Search_Settings {
    * Ensures only one singleton instance of Super_Sonic_Search_Settings is loaded or can be loaded.
    *
    * @param object $parent Object instance.
+   *
    * @return object Super_Sonic_Search_Settings instance
    * @since 1.0.0
    * @static
@@ -475,6 +477,7 @@ class Super_Sonic_Search_Settings {
     if ( is_null( self::$_instance ) ) {
       self::$_instance = new self( $parent );
     }
+
     return self::$_instance;
   } // End instance()
 

@@ -67,7 +67,9 @@ class Ingester {
   }
 
   /** Ingest multiple posts
+   *
    * @param array $query_args The query for the posts to ingest.
+   *
    * @return void
    */
   public function posts_ingest( $query_args ) {
@@ -87,7 +89,7 @@ class Ingester {
       /* get custom-crafted SEO description items if any. */
       foreach ( self::SEO_DESCRIPTION_META_KEYS as $metakey ) {
         $metaval = get_post_meta( $post->ID, $metakey, true );
-        if ( is_string( $metaval ) ) {
+        if ( is_string( $metaval ) && strlen( $metaval ) > 0 ) {
           $this->object_ingest( $post, $metakey, $metaval );
         }
       }
@@ -102,6 +104,7 @@ class Ingester {
    * @param WP_Post $post The post involved.
    * @param string $object The name of the object ('title', 'content', some meta_key).
    * @param string $content The text to ingest.
+   *
    * @return void
    */
   private function object_ingest( $post, $object, $content ) {
@@ -110,9 +113,11 @@ class Ingester {
     $objects      = get_post_meta( $post->ID, self::SUPER_SONIC_SEARCH_OBJECTS, true );
     $objects      = is_array( $objects ) ? $objects : [];
     $objectsDirty = false;
-    $cleaned      = is_string( $content ) ? $content : '';
-    $cleaned      = $this->cleanContent( $cleaned );
-    $hash         = hash( 'sha1', $cleaned );
+
+    $cleaned = is_string( $content ) ? $content : '';
+    $cleaned = $this->cleanContent( $cleaned );
+    $cleaned = $this->normalizeContent( $cleaned );
+    $hash    = hash( 'sha1', $cleaned );
     if ( array_key_exists( $object, $objects ) && $objects[ $object ] !== $hash ) {
       /* different content already ingested, remove it. */
       $this->ingest->flusho( $this->collection, self::BUCKET, $object );
@@ -150,17 +155,42 @@ class Ingester {
   private function getCollectionName() {
     global $wpdb;
     $tag = get_option( 'siteurl' ) . $wpdb->prefix;
+
     return substr( md5( $tag ), 0, 12 );
   }
 
   /** Remove tags and punctuation. Normalize whitespace to single ' ' characters.
+   *
    * @param string $text Text string to prepare for ingestion.
+   *
    * @return array|string|string[]|null Cleaned string.
    */
   private function cleanContent( $text ) {
     $a = wp_strip_all_tags( $text, true );
-    //TODO can we leave punctuation?  $a = preg_replace('/[[:punct:]]/mSu', ' ', $a);
+
+    //TODO looks like we can leave punctuation?  $a = preg_replace('/[[:punct:]]/mSu', ' ', $a);
     return preg_replace( '/\s\s+/mSu', ' ', $a );
+  }
+
+  /** Normalize content by including copies of words
+   * with diacritical marks, with those marks removed.
+   * //TODO does double words mess up Sonic?
+   *
+   * @param string $text The content.
+   *
+   * @return string
+   */
+  private function normalizeContent( $text ) {
+    $results = [];
+    foreach ( array_filter( explode( ' ', $text ) ) as $word ) {
+      $results [] = $word;
+      $norm       = remove_accents( $word );
+      if ( $norm !== $word ) {
+        $results[] = $norm;
+      }
+    }
+
+    return implode( ' ', $results );
   }
 
   /** Sonic needs a three-letter ISO 639-3 language code. This gets it from the current locale.
@@ -172,6 +202,7 @@ class Ingester {
     }
     require_once 'class-iso-language.php';
     $this->locale = ISO_Language::getLanguage( get_bloginfo( "language" ) );
+
     return $this->locale;
   }
 

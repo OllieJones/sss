@@ -8,12 +8,8 @@
 namespace OllieJones;
 
 require_once plugin_dir_path( __FILE__ ) . 'class-super-sonic-search-query-hooks.php';
-require_once plugin_dir_path( __FILE__ ) . 'lib/class-super-sonic-search-admin-api.php';
-require_once plugin_dir_path( __FILE__ ) . 'lib/class-super-sonic-search-admin-hooks.php';
-require_once plugin_dir_path( __FILE__ ) . 'lib/class-ingest.php';
 
 use Super_Sonic_Search_Admin_API;
-use WP_Query;
 
 if ( ! defined( 'ABSPATH' ) ) {
   exit;
@@ -140,14 +136,14 @@ class Super_Sonic_Search {
     add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_styles' ], 10 );
     add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ], 10 );
 
-    // Load admin JS & CSS.
-    add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ], 10, 1 );
-    add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_styles' ], 10, 1 );
-
     // Load API for various admin functions.
     if ( is_admin() ) {
+      require_once plugin_dir_path( __FILE__ ) . 'lib/class-super-sonic-search-admin-api.php';
       $this->admin       = new Super_Sonic_Search_Admin_API();
-      $this->admin_hooks = new Super_Sonic_Search_Hooks();
+      // Load admin JS & CSS.
+      add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ], 10, 1 );
+      add_action( 'admin_enqueue_styles', [ $this, 'admin_enqueue_styles' ], 10, 1 );
+
     }
     $this->query_hooks = new Super_Sonic_Search_Query_Hooks();
 
@@ -247,7 +243,7 @@ class Super_Sonic_Search {
    * @since 1.0.0
    * @static
    */
-  public static function instance( $file = '', $version = '1.0.0' ) {
+  public static function instance( $file = '', $version = 'x' ) {
     if ( is_null( self::$_instance ) ) {
       self::$_instance = new self( $file, $version );
     }

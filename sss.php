@@ -37,7 +37,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-super-sonic-search-se
  * @return object Super_Sonic_Search
  */
 function super_sonic_search() {
-	$instance = Super_Sonic_Search::instance( __FILE__, '1.0.0' );
+	$instance = Super_Sonic_Search::instance( __FILE__, '0.1.0' );
 
 	if ( is_null( $instance->settings ) ) {
 		$instance->settings = Super_Sonic_Search_Settings::instance( $instance );

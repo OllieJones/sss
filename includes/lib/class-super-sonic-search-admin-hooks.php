@@ -15,14 +15,17 @@ class Super_Sonic_Search_Hooks extends Word_Press_Hooks {
     parent::__construct();
   }
 
-  /** When a post is updated, rework the search index.
-   * @param int $post_ID Changed post id.
-   * @param WP_Post $post_after The Post object after the change.
-   * @param WP_Post $post_before The Post object before the change.
-   * @return void
+  /**
+   * Fires once a post has been saved.
+   *
+   * @param int $post_ID Post ID.
+   * @param WP_Post $post Post object.
+   * @param bool $update Whether this is an existing post being updated.
+   *
+   * @since 2.0.0
+   *
    */
-  public function action__post_updated( $post_ID, WP_Post $post_after, WP_Post $post_before ) {
-
-    $this->ingester->post_ingest( $post_after );
+  public function action__wp_insert_post( $post_ID, $post, $update ) {
+    $this->ingester->post_ingest( $post );
   }
 }

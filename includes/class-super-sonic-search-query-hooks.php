@@ -5,15 +5,29 @@ namespace OllieJones;
 use WP_Post;
 use WP_Query;
 
-require_once 'lib/class-search.php';
 require_once 'lib/class-wordpress-hooks.php';
 
 class Super_Sonic_Search_Query_Hooks extends Word_Press_Hooks {
-  private $searcher;
 
   public function __construct() {
     parent::__construct();
-    $this->searcher = new Searcher();
+  }
+
+  /**
+   * Fires once a post has been saved.
+   *
+   * @param int $post_ID Post ID.
+   * @param WP_Post $post Post object.
+   * @param bool $update Whether this is an existing post being updated.
+   *
+   * @since 2.0.0
+   *
+   */
+  public function action__wp_insert_post( $post_ID, $post, $update ) {
+
+    require_once plugin_dir_path( __FILE__ ) . 'lib/class-ingest.php';
+    $ingester = new Ingester();
+    $ingester->post_ingest( $post );
   }
 
   /**
@@ -37,53 +51,14 @@ class Super_Sonic_Search_Query_Hooks extends Word_Press_Hooks {
    */
   public function filter__posts_pre_query( $posts, $query ) {
     if ( $query->is_search() && ! isset( $posts ) ) {
+      require_once 'lib/class-search.php';
+      $searcher = new Searcher();
       $searchterm = $query->query_vars['s'];
 
-      return $this->searcher->search( $searchterm, $query );
+      return $searcher->search( $searchterm, $query );
     }
 
     return $posts;
-  }
-
-  /**
-   * Fires after the query variable object is created, but before the actual query is run.
-   *
-   * Note: If using conditional tags, use the method versions within the passed instance
-   * (e.g. $this->is_main_query() instead of is_main_query()). This is because the functions
-   * like is_main_query() test against the global $wp_query instance, not the passed one.
-   *
-   * @param WP_Query $query The WP_Query instance (passed by reference).
-   *
-   * @since 2.0.0
-   *
-   */
-  public function action__pre_get_posts( $query ) {
-    $a = $query;
-  }
-
-  /**
-   * Fires after the main query vars have been parsed.
-   *
-   * @param WP_Query $query The WP_Query instance (passed by reference).
-   *
-   * @since 1.5.0
-   *
-   */
-  public function action__parse_query( $query ) {
-    $a = $query;
-  }
-
-  /**
-   * Filters the search SQL that is used in the WHERE clause of WP_Query.
-   *
-   * @param string $search Search SQL for WHERE clause.
-   * @param WP_Query $query The current WP_Query object.
-   *
-   * @since 3.0.0
-   *
-   */
-  public function filter__posts_search( $search, $query ) {
-    return $search;
   }
 
   /**
